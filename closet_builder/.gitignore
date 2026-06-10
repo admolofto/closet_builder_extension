@@ -1,0 +1,10 @@
+# Built extension packages
+*.rbz
+
+# SketchUp files
+*.skp
+*.skb
+
+# OS cruft
+.DS_Store
+Thumbs.db
