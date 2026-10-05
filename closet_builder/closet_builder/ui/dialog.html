@@ -9,7 +9,7 @@
   }
   * { box-sizing: border-box; }
   body {
-    margin: 0; padding: 14px; background: var(--bg); color: var(--text);
+    margin: 0; padding: 14px 14px 122px; background: var(--bg); color: var(--text);
     font: 13px/1.45 -apple-system, "Segoe UI", system-ui, sans-serif;
     user-select: none;
   }
@@ -33,20 +33,53 @@
   }
   .row input[type=checkbox] { margin: 0; }
   .row .chk-label { flex: 1; color: var(--text); }
+  .row.chk { padding-left: 126px; }
+  .row.chk label { display: none; }
   .swatch {
     flex: 0 0 18px; height: 18px; border-radius: 4px; border: 1px solid var(--border);
   }
   .hint { color: var(--muted); font-size: 11px; margin: -2px 0 6px 126px; }
-  .sub { font-weight: 600; font-size: 11px; color: var(--muted); margin: 10px 0 2px;
-         text-transform: uppercase; letter-spacing: 0.04em; }
-  .buttons { display: flex; gap: 8px; margin-top: 12px; }
+  .hint.flush { margin-left: 0; }
+  .dims { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 6px 0; }
+  .dims label {
+    display: block; font-size: 11px; color: var(--muted); margin-bottom: 2px;
+  }
+  .dims input {
+    width: 100%; padding: 5px 7px; border: 1px solid var(--border);
+    border-radius: 5px; font: inherit; background: #fff;
+  }
+  .req { color: #b91c1c; }
+  details.adv { margin: 10px 0 2px; }
+  details.adv > summary {
+    cursor: pointer; font-weight: 600; font-size: 11px; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.04em; list-style: none;
+    display: flex; align-items: center; gap: 5px; padding: 2px 0;
+  }
+  details.adv > summary::-webkit-details-marker { display: none; }
+  details.adv > summary::before { content: '\25B8'; font-size: 10px; }
+  details.adv[open] > summary::before { content: '\25BE'; }
+  details.adv.card {
+    border: 1px solid var(--border); border-radius: 8px; background: var(--panel);
+    margin: 0 0 10px; padding: 8px 12px;
+  }
+  #footer {
+    position: fixed; left: 0; right: 0; bottom: 0; padding: 10px 14px;
+    background: var(--bg); border-top: 1px solid var(--border);
+    box-shadow: 0 -2px 6px rgba(0,0,0,0.05);
+  }
+  #footer .chk { padding-left: 0; margin: 0 0 8px; }
+  .buttons { display: flex; gap: 8px; }
   button {
     padding: 9px 14px; border-radius: 6px; border: 1px solid var(--border);
     background: var(--panel); font: inherit; font-weight: 600; cursor: pointer;
   }
   button.primary { background: var(--accent); border-color: var(--accent); color: #fff; flex: 1; }
   button.primary:hover { background: var(--accent-h); }
-  #status { margin-top: 8px; font-size: 12px; min-height: 16px; }
+  button:disabled { opacity: 0.5; cursor: default; }
+  .row .unit { flex: 0 0 14px; color: var(--muted); }
+  .buttons.anim { margin: 10px 0 6px; }
+  .buttons.anim button { flex: 1; }
+  #status { margin-top: 6px; font-size: 12px; min-height: 16px; }
   #status.ok { color: var(--accent); }
   #status.err { color: #b91c1c; }
   #editBadge {
@@ -63,60 +96,77 @@
 
   <div class="tabs">
     <div class="tab" data-type="drawer_bank">Drawers</div>
-    <div class="tab" data-type="closet">Closet</div>
+    <div class="tab" data-type="closet">Closet/Cabinet</div>
+    <div class="tab" data-type="corner_closet">Corner</div>
     <div class="tab" data-type="cubby">Cubby</div>
   </div>
 
   <fieldset>
     <legend>Dimensions (inches)</legend>
-    <div class="row"><label>Width</label><input type="text" id="width"></div>
-    <div class="row"><label>Height</label><input type="text" id="height"></div>
-    <div class="row"><label>Depth</label><input type="text" id="depth"></div>
-    <div class="hint">Accepts decimals or fractions, e.g. 32.5 or 32 1/2</div>
-    <div class="row"><label>Carcass thickness</label>
-      <select id="panel">
-        <option value="0.75" selected>3/4&quot;</option>
-        <option value="0.625">5/8&quot;</option>
-        <option value="0.5">1/2&quot;</option>
-        <option value="custom">Custom...</option>
-      </select></div>
-    <div class="row" id="panelCustomRow" style="display:none">
-      <label>Custom thickness</label><input type="text" id="panel_custom" placeholder="e.g. 18mm = 0.709"></div>
-    <div class="row"><label>Back thickness</label>
-      <select id="back_thickness">
-        <option value="match" selected>Match carcass</option>
-        <option value="0.25">1/4&quot;</option>
-        <option value="0.5">1/2&quot;</option>
-        <option value="0.75">3/4&quot;</option>
-        <option value="custom">Custom...</option>
-      </select></div>
-    <div class="row" id="backCustomRow" style="display:none">
-      <label>Custom back</label><input type="text" id="back_custom" placeholder="e.g. 3/8"></div>
-    <div class="row"><label>Base</label>
+    <div class="dims">
+      <div id="widthCell"><label for="width">Width <span class="req">*</span></label><input type="text" id="width"></div>
+      <div><label for="height">Height <span class="req">*</span></label><input type="text" id="height"></div>
+      <div><label for="depth">Depth <span class="req">*</span></label><input type="text" id="depth"></div>
+    </div>
+    <div class="hint flush">Accepts decimals or fractions, e.g. 32.5 or 32 1/2</div>
+    <div class="row" id="baseTypeRow"><label>Base</label>
       <select id="base_type">
         <option value="none">None (sits on floor)</option>
         <option value="toe_kick">Toe kick</option>
         <option value="riser">Riser (separate plinth)</option>
       </select></div>
-    <div class="row"><label>Base height</label><input type="text" id="base_height"></div>
-    <div class="row"><label></label><input type="checkbox" id="top_on_sides" checked>
-      <span class="chk-label">Top rests on side panels</span></div>
-    <div class="row"><label></label><input type="checkbox" id="back_full" checked>
-      <span class="chk-label">Full back (covers sides &amp; top edges)</span></div>
-    <div class="row"><label></label><input type="checkbox" id="bottom_under_sides" checked>
-      <span class="chk-label">Bottom goes under side panels (riser/no base)</span></div>
-    <div class="row"><label></label><input type="checkbox" id="riser_top" checked>
-      <span class="chk-label">Riser has top panel (rests on riser sides)</span></div>
+    <div class="row" id="baseHeightRow"><label>Base height</label><input type="text" id="base_height"></div>
+    <div class="row chk" id="riserFaceRow"><label></label><input type="checkbox" id="riser_face">
+      <span class="chk-label">Riser face (decorative, matches fronts)</span></div>
+    <div class="row" id="riserFaceSetbackRow"><label>Face set-back</label><input type="text" id="riser_face_setback"></div>
+    <div class="hint" id="riserFaceSetbackHint">0 = flush with drawer faces / doors; e.g. 2 1/2 recesses it like a toe kick</div>
+    <div class="row" id="riserFaceGapsRow"><label>Face Left / Right</label>
+      <input type="text" id="riser_face_left_gap"><input type="text" id="riser_face_right_gap"></div>
+    <div class="hint" id="riserFaceGapsHint">Inset of the riser face from each side of the unit</div>
+    <div class="hint" id="cornerFixedHint" style="display:none">Height is overall, including the top cap.
+      Corner units are built with a fixed construction: plinth base with flush toe boards,
+      applied finished ends, top caps and a wall brace.</div>
+
+    <details class="adv" id="advConstruction">
+      <summary>Construction details</summary>
+      <div class="row"><label>Carcass thickness</label>
+        <select id="panel">
+          <option value="0.75" selected>3/4&quot;</option>
+          <option value="0.625">5/8&quot;</option>
+          <option value="0.5">1/2&quot;</option>
+          <option value="custom">Custom...</option>
+        </select></div>
+      <div class="row" id="panelCustomRow" style="display:none">
+        <label>Custom thickness</label><input type="text" id="panel_custom" placeholder="e.g. 18mm = 0.709"></div>
+      <div class="row"><label>Back thickness</label>
+        <select id="back_thickness">
+          <option value="match" selected>Match carcass</option>
+          <option value="0.25">1/4&quot;</option>
+          <option value="0.5">1/2&quot;</option>
+          <option value="0.75">3/4&quot;</option>
+          <option value="custom">Custom...</option>
+        </select></div>
+      <div class="row" id="backCustomRow" style="display:none">
+        <label>Custom back</label><input type="text" id="back_custom" placeholder="e.g. 3/8"></div>
+      <div class="row chk" id="topOnSidesRow"><label></label><input type="checkbox" id="top_on_sides" checked>
+        <span class="chk-label">Top rests on side panels</span></div>
+      <div class="row chk" id="backFullRow"><label></label><input type="checkbox" id="back_full" checked>
+        <span class="chk-label">Full back (covers sides &amp; top edges)</span></div>
+      <div class="row chk" id="bottomUnderRow"><label></label><input type="checkbox" id="bottom_under_sides" checked>
+        <span class="chk-label">Bottom goes under side panels</span></div>
+      <div class="row chk" id="riserTopRow"><label></label><input type="checkbox" id="riser_top" checked>
+        <span class="chk-label">Riser has top panel (rests on riser sides)</span></div>
+    </details>
   </fieldset>
 
-  <fieldset>
-    <legend>Face edge gaps (overlay fronts &amp; doors)</legend>
-    <div class="row"><label>Left gap</label><input type="text" id="face_left_gap"></div>
-    <div class="row"><label>Right gap</label><input type="text" id="face_right_gap"></div>
-    <div class="row"><label>Top gap</label><input type="text" id="face_top_gap"></div>
-    <div class="row"><label>Bottom gap</label><input type="text" id="face_bottom_gap"></div>
+  <details class="adv card" id="advFaceGaps">
+    <summary>Face edge gaps (overlay fronts &amp; doors)</summary>
+    <div class="row"><label>Left / Right</label>
+      <input type="text" id="face_left_gap"><input type="text" id="face_right_gap"></div>
+    <div class="row"><label>Top / Bottom</label>
+      <input type="text" id="face_top_gap"><input type="text" id="face_bottom_gap"></div>
     <div class="hint">Set sides to e.g. 3/16 where another cabinet sits beside, top/bottom when stacking</div>
-  </fieldset>
+  </details>
 
   <fieldset class="only" id="opts-drawer_bank">
     <legend>Drawers</legend>
@@ -136,36 +186,107 @@
       <label>Custom heights</label><input type="text" id="custom_heights" placeholder="4, 4, *, *, *">
     </div>
     <div class="hint" id="customHint" style="display:none">Top &rarr; bottom, inches. Use * for &quot;share remaining space&quot;.</div>
-    <div class="row"><label>Face reveal</label><input type="text" id="reveal"></div>
-    <div class="hint">Gap between drawer faces (and around inset faces)</div>
-    <div class="row"><label>Face-carcass gap</label><input type="text" id="face_gap"></div>
-    <div class="hint">Space between back of drawer face and carcass front (overlay)</div>
 
-    <div class="row"><label>Box thickness</label><input type="text" id="box_thickness"></div>
-    <div class="hint">Drawer box wall material thickness</div>
-    <div class="row"><label>Bottom thickness</label><input type="text" id="bottom_thickness"></div>
-    <div class="hint">Drawer bottom panel material thickness</div>
+    <details class="adv" id="advFaceBox">
+      <summary>Face &amp; box construction</summary>
+      <div class="row"><label>Face reveal</label><input type="text" id="reveal"></div>
+      <div class="hint">Gap between drawer faces (and around inset faces)</div>
+      <div class="row"><label>Face-carcass gap</label><input type="text" id="face_gap"></div>
+      <div class="hint">Space between back of drawer face and carcass front (overlay)</div>
+      <div class="row"><label>Box thickness</label><input type="text" id="box_thickness"></div>
+      <div class="hint">Drawer box wall material thickness</div>
+      <div class="row"><label>Bottom thickness</label><input type="text" id="bottom_thickness"></div>
+      <div class="hint">Drawer bottom panel material thickness</div>
+      <div class="row"><label>Box depth</label><input type="text" id="box_depth" placeholder="auto"></div>
+      <div class="hint">Drawer box depth, front to back. Blank = interior depth minus rear gap</div>
+      <div class="row chk"><label></label><input type="checkbox" id="bottom_groove" checked>
+        <span class="chk-label">Bottom captured in groove</span></div>
+      <div class="row" id="grooveDepthRow"><label>Groove depth</label><input type="text" id="bottom_groove_depth"></div>
+      <div class="hint" id="grooveDepthHint">Bottom extends this far into all four box walls</div>
+    </details>
 
-    <div class="sub">Drawer box clearances to carcass</div>
-    <div class="row"><label>Left gap</label><input type="text" id="box_left_gap"></div>
-    <div class="row"><label>Right gap</label><input type="text" id="box_right_gap"></div>
-    <div class="row"><label>Rear gap</label><input type="text" id="box_rear_gap"></div>
-    <div class="row"><label>Bottom box space</label><input type="text" id="box_bottom_gap"></div>
-    <div class="hint">Hardware space under the bottom drawer box</div>
-    <div class="row"><label>Top box gap</label><input type="text" id="box_top_gap"></div>
-    <div class="hint">Gap above the top drawer box</div>
+    <details class="adv" id="advBoxClear">
+      <summary>Box clearances to carcass</summary>
+      <div class="row"><label>Left / Right</label>
+        <input type="text" id="box_left_gap"><input type="text" id="box_right_gap"></div>
+      <div class="row"><label>Rear gap</label><input type="text" id="box_rear_gap"></div>
+      <div class="row"><label>Bottom space</label><input type="text" id="box_bottom_gap"></div>
+      <div class="hint">Hardware space under the bottom drawer box</div>
+      <div class="row"><label>Top box gap</label><input type="text" id="box_top_gap"></div>
+      <div class="hint">Gap above the top drawer box</div>
+    </details>
   </fieldset>
 
   <fieldset class="only" id="opts-closet">
-    <legend>Closet section (2 folding doors)</legend>
-    <div class="row"><label></label><input type="checkbox" id="bifold" checked>
+    <legend>Closet / cabinet</legend>
+    <div class="row"><label>Doors</label>
+      <select id="door_count">
+        <option value="2" selected>2 doors (pair, swing outward)</option>
+        <option value="1">1 door</option>
+      </select></div>
+    <div class="row" id="doorSwingRow"><label>Hinge side</label>
+      <select id="door_swing">
+        <option value="left" selected>Left (left-hand swing)</option>
+        <option value="right">Right (right-hand swing)</option>
+      </select></div>
+    <div class="row chk"><label></label><input type="checkbox" id="bifold" checked>
       <span class="chk-label">Bifold doors (split leaves)</span></div>
-    <div class="row"><label></label><input type="checkbox" id="include_rod" checked>
+    <div class="row"><label>Interior</label>
+      <select id="closet_interior">
+        <option value="rod" selected>Hanging rod</option>
+        <option value="shelves">Shelves</option>
+      </select></div>
+    <div class="row chk" id="includeRodRow"><label></label><input type="checkbox" id="include_rod" checked>
       <span class="chk-label">Hanging rod</span></div>
-    <div class="row"><label>Rod height</label><input type="text" id="rod_height"></div>
-    <div class="row"><label></label><input type="checkbox" id="top_shelf" checked>
+    <div class="row" id="rodHeightRow"><label>Rod height</label><input type="text" id="rod_height"></div>
+    <div class="row chk" id="topShelfRow"><label></label><input type="checkbox" id="top_shelf" checked>
       <span class="chk-label">Shelf above rod</span></div>
+    <div class="row" id="closetShelfCountRow"><label>Shelves</label><input type="number" id="closet_shelf_count" min="1" max="20" step="1"></div>
+    <div class="row" id="shelfLayoutRow"><label>Shelf layout</label>
+      <select id="shelf_layout">
+        <option value="even" selected>Evenly spaced</option>
+        <option value="center">Centered stack</option>
+      </select></div>
+    <div class="row" id="shelfSpacingRow"><label>Shelf spacing</label><input type="text" id="shelf_spacing"></div>
+    <div class="hint" id="shelfSpacingHint">Clear opening between shelves; the stack is centered on the interior</div>
     <div class="row"><label>Door-carcass gap</label><input type="text" id="door_gap"></div>
+    <div class="hint">Stand-off between door faces and carcass front</div>
+  </fieldset>
+
+  <fieldset class="only" id="opts-corner_closet">
+    <legend>Corner closet (L-shaped)</legend>
+    <div class="row"><label>Leg A length <span class="req">*</span></label><input type="text" id="leg_a_length"></div>
+    <div class="row"><label>Leg B length <span class="req">*</span></label><input type="text" id="leg_b_length"></div>
+    <div class="hint">Along each wall from the room corner, over the applied finished ends.
+      Each leg must be at least depth + panel + 6&quot;.</div>
+    <div class="row"><label>Corner side</label>
+      <select id="corner_side">
+        <option value="left" selected>Left (leg B at left end)</option>
+        <option value="right">Right (leg B at right end)</option>
+      </select></div>
+    <div class="hint flush">Leg A: along the main wall</div>
+    <div class="row chk"><label></label><input type="checkbox" id="leg_a_rod" checked>
+      <span class="chk-label">Hanging rod</span></div>
+    <div class="row" id="legARodHeightRow"><label>Rod height</label><input type="text" id="leg_a_rod_height"></div>
+    <div class="row chk"><label></label><input type="checkbox" id="leg_a_shelf" checked>
+      <span class="chk-label">Shelf above rod</span></div>
+    <div class="row chk"><label></label><input type="checkbox" id="leg_a_doors" checked>
+      <span class="chk-label">Door (single overlay panel)</span></div>
+    <div class="hint flush">Leg B: along the return wall</div>
+    <div class="row chk"><label></label><input type="checkbox" id="leg_b_rod" checked>
+      <span class="chk-label">Hanging rod</span></div>
+    <div class="row" id="legBRodHeightRow"><label>Rod height</label><input type="text" id="leg_b_rod_height"></div>
+    <div class="row chk"><label></label><input type="checkbox" id="leg_b_shelf" checked>
+      <span class="chk-label">Shelf above rod</span></div>
+    <div class="row chk"><label></label><input type="checkbox" id="leg_b_doors" checked>
+      <span class="chk-label">Door (single overlay panel)</span></div>
+    <div class="row" id="cornerOverlayRow"><label>Front door</label>
+      <select id="corner_overlay">
+        <option value="leg_a" selected>Leg A door in front (opens first)</option>
+        <option value="leg_b">Leg B door in front (opens first)</option>
+      </select></div>
+    <div class="hint">The doors meet at the corner; the front one laps over the other and must open first</div>
+    <div class="row"><label>Door-carcass gap</label><input type="text" id="corner_door_gap"></div>
     <div class="hint">Stand-off between door faces and carcass front</div>
   </fieldset>
 
@@ -173,45 +294,103 @@
     <legend>Cubby</legend>
     <div class="row"><label>Shelves</label><input type="number" id="shelf_count" min="0" max="20" step="1"></div>
     <div class="row"><label>Vertical dividers</label><input type="number" id="divider_count" min="0" max="10" step="1"></div>
+    <div class="row"><label>Shelf depth</label><input type="text" id="shelf_depth"></div>
+    <div class="hint">Setback from the front edge; 0 = flush with the carcass</div>
+    <div class="row chk"><label></label><input type="checkbox" id="cubby_doors">
+      <span class="chk-label">Doors (full overlay)</span></div>
+    <div class="row" id="cubbyDoorCountRow"><label>Doors</label>
+      <select id="cubby_door_count">
+        <option value="2" selected>2 doors (pair, swing outward)</option>
+        <option value="1">1 door</option>
+      </select></div>
+    <div class="row" id="cubbyDoorSwingRow"><label>Hinge side</label>
+      <select id="cubby_door_swing">
+        <option value="left" selected>Left (left-hand swing)</option>
+        <option value="right">Right (right-hand swing)</option>
+      </select></div>
+    <div class="row" id="cubbyDoorGapRow"><label>Door-carcass gap</label><input type="text" id="cubby_door_gap"></div>
+    <div class="hint" id="cubbyDoorGapHint">Stand-off between door faces and carcass front</div>
   </fieldset>
 
   <fieldset>
     <legend>Materials</legend>
-    <div class="row"><label>Carcass</label><select id="mat_carcass"></select><div class="swatch" id="sw_carcass"></div></div>
-    <div class="row"><label>Faces / doors</label><select id="mat_face"></select><div class="swatch" id="sw_face"></div></div>
-    <div class="row"><label>Drawer boxes</label><select id="mat_box"></select><div class="swatch" id="sw_box"></div></div>
-    <div class="row"><label>Back</label><select id="mat_back"></select><div class="swatch" id="sw_back"></div></div>
-    <div class="row"><label>Drawer bottoms</label><select id="mat_bottom"></select><div class="swatch" id="sw_bottom"></div></div>
-    <div class="row"><label>Shelves</label><select id="mat_shelf"></select><div class="swatch" id="sw_shelf"></div></div>
+    <div class="row" id="matRow_carcass"><label>Carcass</label><select id="mat_carcass"></select><div class="swatch" id="sw_carcass"></div></div>
+    <div class="row" id="matRow_face"><label>Faces / doors</label><select id="mat_face"></select><div class="swatch" id="sw_face"></div></div>
+    <div class="row" id="matRow_box"><label>Drawer boxes</label><select id="mat_box"></select><div class="swatch" id="sw_box"></div></div>
+    <div class="row" id="matRow_back"><label>Back</label><select id="mat_back"></select><div class="swatch" id="sw_back"></div></div>
+    <div class="row" id="matRow_bottom"><label>Drawer bottoms</label><select id="mat_bottom"></select><div class="swatch" id="sw_bottom"></div></div>
+    <div class="row" id="matRow_shelf"><label>Shelves</label><select id="mat_shelf"></select><div class="swatch" id="sw_shelf"></div></div>
   </fieldset>
 
-  <div class="row"><input type="checkbox" id="zoom" checked>
-    <span class="chk-label">Zoom to fit after build</span></div>
+  <details class="adv card" id="advAnim">
+    <summary>Animation</summary>
+    <div class="row"><label>Door angle</label>
+      <input type="number" id="anim_door_angle" min="5" max="170" step="5"><span class="unit">&deg;</span></div>
+    <div class="hint">Bifold doors fold flat at 90&deg;</div>
+    <div class="row"><label>Drawer travel</label>
+      <input type="number" id="anim_drawer_extension" min="5" max="100" step="5"><span class="unit">%</span></div>
+    <div class="hint">Of box depth; 100 = full extension</div>
+    <div class="row"><label>Duration</label>
+      <input type="number" id="anim_duration" min="0.1" max="10" step="0.1"><span class="unit">s</span></div>
+    <div class="row"><label>Stagger</label>
+      <input type="number" id="anim_stagger" min="0" max="5" step="0.05"><span class="unit">s</span></div>
+    <div class="hint">Delay between parts; 0 = all together</div>
+    <div class="row"><label>Easing</label>
+      <select id="anim_easing">
+        <option value="smooth">Smooth (ease in &amp; out)</option>
+        <option value="soft">Soft-close (ease out)</option>
+        <option value="linear">Linear</option>
+      </select></div>
+    <div class="row chk"><label></label><input type="checkbox" id="anim_loop">
+      <span class="chk-label">Loop Play until stopped</span></div>
+    <div class="buttons anim">
+      <button id="animOpenBtn">Open</button>
+      <button id="animCloseBtn">Close</button>
+      <button id="animPlayBtn">Play</button>
+    </div>
+    <div class="hint flush" id="animHint"></div>
+  </details>
 
-  <div class="buttons">
-    <button class="primary" id="buildBtn">Build</button>
-    <button id="closeBtn">Close</button>
+  <div id="footer">
+    <div class="row chk"><input type="checkbox" id="zoom" checked>
+      <span class="chk-label">Zoom to fit after build</span></div>
+    <div class="buttons">
+      <button class="primary" id="buildBtn">Build</button>
+      <button id="closeBtn">Close</button>
+    </div>
+    <div id="status"></div>
   </div>
-  <div id="status"></div>
 
 <script>
 (function () {
   'use strict';
-  var su = window.sketchup || { ready:function(){}, build:function(){}, detach:function(){}, close:function(){} };
+  var su = window.sketchup || { ready:function(){}, build:function(){}, detach:function(){}, close:function(){},
+                                animate:function(){}, anim_settings:function(){}, anim_stop:function(){} };
 
   var TYPE_DEFAULTS = {
     drawer_bank: { width: '30', height: '30', depth: '21', base_type: 'riser', base_height: '4' },
     closet:      { width: '36', height: '84', depth: '24', base_type: 'riser', base_height: '4' },
+    corner_closet: { height: '84', depth: '24', base_type: 'riser', base_height: '3',
+                     leg_a_length: '60', leg_b_length: '48' },
     cubby:       { width: '36', height: '72', depth: '14', base_type: 'riser', base_height: '4' }
   };
 
-  var state = { type: 'drawer_bank', editing: false };
+  // Material roles each unit type actually uses (mirrors builders.rb).
+  var MAT_ROLES = {
+    drawer_bank: ['carcass', 'face', 'box', 'back', 'bottom'],
+    closet:      ['carcass', 'face', 'back', 'shelf'],
+    corner_closet: ['carcass', 'face', 'back', 'shelf'],
+    cubby:       ['carcass', 'back', 'shelf']
+  };
+  var ALL_ROLES = ['carcass', 'face', 'box', 'back', 'bottom', 'shelf'];
+
+  var state = { type: 'drawer_bank', editing: false, animating: false };
   var $ = function (id) { return document.getElementById(id); };
 
-  // --- fraction-friendly number parsing: "30", "30.5", "30 1/2", "3/16"
+  // --- fraction-friendly number parsing: "30", "30.5", ".5", "30 1/2", "3/16"
   function parseDim(str) {
     str = String(str || '').trim();
-    var m = str.match(/^(\d+(?:\.\d+)?)?\s*(?:(\d+)\s*\/\s*(\d+))?$/);
+    var m = str.match(/^(\d+(?:\.\d+)?|\.\d+)?\s*(?:(\d+)\s*\/\s*(\d+))?$/);
     if (!m || (!m[1] && !m[2])) return NaN;
     var v = m[1] ? parseFloat(m[1]) : 0;
     if (m[2]) v += parseInt(m[2], 10) / parseInt(m[3], 10);
@@ -243,10 +422,78 @@
     document.querySelectorAll('.only').forEach(function (f) {
       f.style.display = (f.id === 'opts-' + type) ? 'block' : 'none';
     });
+    ALL_ROLES.forEach(function (r) {
+      $('matRow_' + r).style.display = MAT_ROLES[type].indexOf(r) >= 0 ? 'flex' : 'none';
+    });
+    $('widthCell').style.display = type === 'corner_closet' ? 'none' : 'block';
     if (!state.editing) {
       var d = TYPE_DEFAULTS[type];
       Object.keys(d).forEach(function (k) { $(k).value = d[k]; });
     }
+    updateCubbyDoorRows();
+  }
+
+  function updateBaseRows() {
+    // Corner closets use a fixed construction (plinth base, finished ends,
+    // top caps): hide every base / construction toggle that no longer applies.
+    var corner = state.type === 'corner_closet';
+    var base = $('base_type').value;
+    var face = !corner && base === 'riser' && $('riser_face').checked;
+    $('baseTypeRow').style.display    = corner ? 'none' : 'flex';
+    $('cornerFixedHint').style.display = corner ? 'block' : 'none';
+    $('baseHeightRow').style.display  = !corner && base === 'none' ? 'none' : 'flex';
+    $('riserTopRow').style.display    = !corner && base === 'riser' ? 'flex' : 'none';
+    $('riserFaceRow').style.display   = !corner && base === 'riser' ? 'flex' : 'none';
+    $('riserFaceSetbackRow').style.display  = face ? 'flex' : 'none';
+    $('riserFaceSetbackHint').style.display = face ? 'block' : 'none';
+    $('riserFaceGapsRow').style.display     = face ? 'flex' : 'none';
+    $('riserFaceGapsHint').style.display    = face ? 'block' : 'none';
+    $('bottomUnderRow').style.display = corner || base === 'toe_kick' ? 'none' : 'flex';
+    $('topOnSidesRow').style.display  = corner ? 'none' : 'flex';
+    $('backFullRow').style.display    = corner ? 'none' : 'flex';
+    // The riser face borrows the face/door material even on units
+    // (cubbies) that otherwise have no fronts; cubby doors need it too.
+    var cubbyDoors = state.type === 'cubby' && $('cubby_doors').checked;
+    $('matRow_face').style.display =
+      (MAT_ROLES[state.type].indexOf('face') >= 0 || face || cubbyDoors) ? 'flex' : 'none';
+  }
+
+  function updateCubbyDoorRows() {
+    var doors = $('cubby_doors').checked;
+    $('cubbyDoorCountRow').style.display = doors ? 'flex' : 'none';
+    $('cubbyDoorSwingRow').style.display =
+      doors && $('cubby_door_count').value === '1' ? 'flex' : 'none';
+    $('cubbyDoorGapRow').style.display = doors ? 'flex' : 'none';
+    $('cubbyDoorGapHint').style.display = doors ? 'block' : 'none';
+    // The face edge gaps only matter on a cubby once it has doors.
+    $('advFaceGaps').style.display =
+      state.type === 'cubby' && !doors ? 'none' : 'block';
+    updateBaseRows();
+  }
+
+  function updateRodRow() {
+    var shelves = $('closet_interior').value === 'shelves';
+    var centered = $('shelf_layout').value === 'center';
+    // Shelves replace the rod and the shelf above it.
+    $('includeRodRow').style.display = shelves ? 'none' : 'flex';
+    $('topShelfRow').style.display   = shelves ? 'none' : 'flex';
+    $('rodHeightRow').style.display  = !shelves && $('include_rod').checked ? 'flex' : 'none';
+    $('closetShelfCountRow').style.display = shelves ? 'flex' : 'none';
+    $('shelfLayoutRow').style.display      = shelves ? 'flex' : 'none';
+    $('shelfSpacingRow').style.display     = shelves && centered ? 'flex' : 'none';
+    $('shelfSpacingHint').style.display    = shelves && centered ? 'block' : 'none';
+  }
+
+  function updateDoorRows() {
+    // Hinge side only applies to a single door; a pair swings outward.
+    $('doorSwingRow').style.display = $('door_count').value === '1' ? 'flex' : 'none';
+  }
+
+  function updateCornerRodRows() {
+    $('legARodHeightRow').style.display = $('leg_a_rod').checked ? 'flex' : 'none';
+    $('legBRodHeightRow').style.display = $('leg_b_rod').checked ? 'flex' : 'none';
+    $('cornerOverlayRow').style.display =
+      $('leg_a_doors').checked && $('leg_b_doors').checked ? 'flex' : 'none';
   }
 
   function updateThicknessRows() {
@@ -270,6 +517,43 @@
     var show = $('height_mode').value === 'custom';
     $('customRow').style.display = show ? '' : 'none';
     $('customHint').style.display = show ? '' : 'none';
+  }
+
+  function updateGrooveRow() {
+    var show = $('bottom_groove').checked;
+    $('grooveDepthRow').style.display = show ? '' : 'none';
+    $('grooveDepthHint').style.display = show ? '' : 'none';
+  }
+
+  // When editing a unit, open any collapsed section whose fields differ from
+  // the defaults so non-default values aren't hidden out of sight.
+  function openAdvancedIfChanged() {
+    var diff = function (id, def) {
+      var a = parseDim($(id).value), b = parseDim(def);
+      return isNaN(a) || Math.abs(a - b) > 1e-9;
+    };
+    var fixedConstruction = state.type === 'corner_closet';
+    if ($('panel').value !== '0.75' || $('back_thickness').value !== 'match' ||
+        (!fixedConstruction &&
+         (!$('top_on_sides').checked || !$('back_full').checked ||
+          !$('bottom_under_sides').checked || !$('riser_top').checked))) {
+      $('advConstruction').open = true;
+    }
+    if (diff('face_left_gap', '0') || diff('face_right_gap', '0') ||
+        diff('face_top_gap', '0') || diff('face_bottom_gap', '0')) {
+      $('advFaceGaps').open = true;
+    }
+    if (diff('reveal', '1/8') || diff('face_gap', '1/4') ||
+        diff('box_thickness', '1/2') || diff('bottom_thickness', '1/2') ||
+        $('box_depth').value.trim() !== '' ||
+        !$('bottom_groove').checked || diff('bottom_groove_depth', '3/16')) {
+      $('advFaceBox').open = true;
+    }
+    if (diff('box_left_gap', '1/2') || diff('box_right_gap', '1/2') ||
+        diff('box_rear_gap', '1') || diff('box_bottom_gap', '1') ||
+        diff('box_top_gap', '5/8')) {
+      $('advBoxClear').open = true;
+    }
   }
 
   function fillMaterials(materials) {
@@ -298,18 +582,23 @@
     sel._updateSwatch();
   }
 
-  var DIM_FIELDS = ['width', 'height', 'depth', 'base_height', 'rod_height',
+  var DIM_FIELDS = ['width', 'height', 'depth', 'base_height', 'riser_face_setback',
+                    'riser_face_left_gap', 'riser_face_right_gap', 'rod_height',
                     'reveal', 'face_left_gap', 'face_right_gap', 'face_top_gap',
                     'face_bottom_gap', 'box_left_gap', 'box_right_gap', 'box_rear_gap',
-                    'box_bottom_gap', 'box_top_gap', 'door_gap',
-                    'box_thickness', 'bottom_thickness', 'face_gap'];
+                    'box_bottom_gap', 'box_top_gap', 'box_depth', 'door_gap',
+                    'box_thickness', 'bottom_thickness', 'bottom_groove_depth', 'face_gap',
+                    'leg_a_length', 'leg_b_length', 'leg_a_rod_height', 'leg_b_rod_height',
+                    'shelf_depth', 'shelf_spacing'];
 
   function gather() {
     var p = { type: state.type };
+    var required = state.type === 'corner_closet'
+      ? ['height', 'depth', 'leg_a_length', 'leg_b_length']
+      : ['width', 'height', 'depth'];
     for (var i = 0; i < DIM_FIELDS.length; i++) {
       var raw = $(DIM_FIELDS[i]).value;
-      var v = (String(raw).trim() === '' && DIM_FIELDS[i] !== 'width' &&
-               DIM_FIELDS[i] !== 'height' && DIM_FIELDS[i] !== 'depth')
+      var v = (String(raw).trim() === '' && required.indexOf(DIM_FIELDS[i]) < 0)
               ? 0 : parseDim(raw);
       if (isNaN(v)) { status('Invalid value for ' + DIM_FIELDS[i].replace(/_/g, ' '), true); return null; }
       p[DIM_FIELDS[i]] = v;
@@ -334,15 +623,49 @@
     p.back_full      = $('back_full').checked;
     p.bottom_under_sides = $('bottom_under_sides').checked;
     p.riser_top      = $('riser_top').checked;
+    p.riser_face     = $('riser_face').checked;
     p.front_style    = $('front_style').value;
     p.drawer_count   = parseInt($('drawer_count').value, 10) || 4;
+    p.bottom_groove  = $('bottom_groove').checked;
     p.height_mode    = $('height_mode').value;
     p.custom_heights = parseHeights($('custom_heights').value);
+    p.door_count     = parseInt($('door_count').value, 10) || 2;
+    p.door_swing     = $('door_swing').value;
     p.bifold         = $('bifold').checked;
     p.include_rod    = $('include_rod').checked;
     p.top_shelf      = $('top_shelf').checked;
     p.shelf_count    = parseInt($('shelf_count').value, 10) || 0;
     p.divider_count  = parseInt($('divider_count').value, 10) || 0;
+    p.cubby_doors    = $('cubby_doors').checked;
+    if (state.type === 'cubby') {
+      p.door_count = parseInt($('cubby_door_count').value, 10) || 2;
+      p.door_swing = $('cubby_door_swing').value;
+      p.door_gap   = parseDim($('cubby_door_gap').value) || 0;
+    }
+    p.closet_interior = $('closet_interior').value;
+    p.shelf_layout    = $('shelf_layout').value;
+    if (state.type === 'closet') {
+      p.shelf_count = parseInt($('closet_shelf_count').value, 10) || 0;
+      if (p.closet_interior === 'shelves' && p.shelf_count < 1) {
+        status('Enter at least 1 shelf', true); return null;
+      }
+    }
+    if (state.type === 'corner_closet') {
+      p.width = p.leg_a_length; // width mirrors leg A for normalize/back-compat
+      p.corner_side = $('corner_side').value;
+      p.leg_a_rod   = $('leg_a_rod').checked;
+      p.leg_b_rod   = $('leg_b_rod').checked;
+      p.leg_a_shelf = $('leg_a_shelf').checked;
+      p.leg_b_shelf = $('leg_b_shelf').checked;
+      p.leg_a_doors = $('leg_a_doors').checked;
+      p.leg_b_doors = $('leg_b_doors').checked;
+      p.corner_overlay = $('corner_overlay').value;
+      p.door_gap    = parseDim($('corner_door_gap').value) || 0;
+      p.base_type   = 'riser'; // fixed plinth; the hidden select may be stale
+      var minLeg = p.depth + p.panel + 6;
+      if (p.leg_b_length < minLeg) { status('Leg B must be at least depth + panel + 6"', true); return null; }
+      if (p.leg_a_length < minLeg) { status('Leg A must be at least depth + panel + 6"', true); return null; }
+    }
     p.zoom           = $('zoom').checked;
     ['carcass', 'face', 'box', 'back', 'shelf', 'bottom'].forEach(function (r) {
       p['mat_' + r] = $('mat_' + r).value;
@@ -364,6 +687,33 @@
     state.editing = editing;
     $('editBadge').style.display = editing ? 'block' : 'none';
     $('buildBtn').textContent = editing ? 'Update' : 'Build';
+    updateAnimButtons();
+  }
+
+  // --- animation: settings are per user (Ruby stores them); the buttons
+  // move the unit being edited, as built.
+  var ANIM_NUMS = ['door_angle', 'drawer_extension', 'duration', 'stagger'];
+
+  function animSettings() {
+    var s = { easing: $('anim_easing').value, loop: $('anim_loop').checked };
+    ANIM_NUMS.forEach(function (k) { s[k] = parseFloat($('anim_' + k).value); });
+    return JSON.stringify(s);
+  }
+
+  function setAnim(s) {
+    ANIM_NUMS.forEach(function (k) { $('anim_' + k).value = s[k]; });
+    $('anim_easing').value = s.easing;
+    $('anim_loop').checked = !!s.loop;
+  }
+
+  function updateAnimButtons() {
+    $('animOpenBtn').disabled = !state.editing;
+    $('animCloseBtn').disabled = !state.editing;
+    $('animPlayBtn').disabled = !state.editing && !state.animating;
+    $('animPlayBtn').textContent = state.animating ? 'Stop' : 'Play';
+    $('animHint').textContent = state.editing
+      ? 'Esc also stops. Right-click units for Animate Doors and Drawers.'
+      : 'Build the unit to animate it.';
   }
 
   // --- public API called from Ruby ---
@@ -373,8 +723,18 @@
       // defaults
       $('drawer_count').value = 4;
       $('shelf_count').value = 4;
+      $('closet_shelf_count').value = 3;
+      $('shelf_spacing').value = '12';
       $('divider_count').value = 0;
+      $('shelf_depth').value = '0';
       $('rod_height').value = '66';
+      $('leg_a_rod_height').value = '66';
+      $('leg_b_rod_height').value = '66';
+      $('corner_door_gap').value = '1/4';
+      $('cubby_door_gap').value = '1/4';
+      $('riser_face_setback').value = '0';
+      $('riser_face_left_gap').value = '0';
+      $('riser_face_right_gap').value = '0';
       $('reveal').value = '1/8';
       $('face_left_gap').value = '0';
       $('face_right_gap').value = '0';
@@ -389,13 +749,15 @@
       $('face_gap').value = '1/4';
       $('box_thickness').value = '1/2';
       $('bottom_thickness').value = '1/2';
-      setMat('carcass', 'white_melamine');
-      setMat('face', 'maple');
-      setMat('box', 'birch_ply');
-      setMat('bottom', 'birch_ply');
-      setMat('back', 'white_melamine');
-      setMat('shelf', 'white_melamine');
+      $('bottom_groove_depth').value = '3/16';
+      setMat('carcass', 'finished_34');
+      setMat('face', 'face_34');
+      setMat('box', 'rift_12');
+      setMat('bottom', 'rift_12');
+      setMat('back', 'rift_12');
+      setMat('shelf', 'finished_34');
       setType('drawer_bank');
+      if (data.anim) setAnim(data.anim);
 
       if (data.params) {
         var p = data.params;
@@ -407,10 +769,18 @@
           $('face_left_gap').value = p.side_gap;
           $('face_right_gap').value = p.side_gap;
         }
+        // Riser face gaps used to follow the face edge gaps; keep older
+        // units unchanged by seeding from them.
+        if (p.riser_face_left_gap === undefined) {
+          $('riser_face_left_gap').value = $('face_left_gap').value;
+          $('riser_face_right_gap').value = $('face_right_gap').value;
+        }
         if (p.box_left_gap === undefined && p.box_side_gap !== undefined) {
           $('box_left_gap').value = p.box_side_gap;
           $('box_right_gap').value = p.box_side_gap;
         }
+        if (!p.box_depth) $('box_depth').value = ''; // 0 = auto, show as blank
+        if (p.bottom_groove !== undefined) $('bottom_groove').checked = p.bottom_groove;
         setSelectValue('panel', 'panel_custom', p.panel);
         if (p.back_match) {
           $('back_thickness').value = 'match';
@@ -422,25 +792,51 @@
         if (p.back_full !== undefined) $('back_full').checked = p.back_full;
         if (p.bottom_under_sides !== undefined) $('bottom_under_sides').checked = p.bottom_under_sides;
         if (p.riser_top !== undefined) $('riser_top').checked = p.riser_top;
+        if (p.riser_face !== undefined) $('riser_face').checked = p.riser_face;
         if (p.front_style) $('front_style').value = p.front_style;
         $('drawer_count').value = p.drawer_count;
         if (p.height_mode) $('height_mode').value = p.height_mode;
         else if (p.graduated) $('height_mode').value = 'graduated';
         $('custom_heights').value = heightsToString(p.custom_heights);
+        if (p.door_count) $('door_count').value = String(p.door_count);
+        if (p.door_swing) $('door_swing').value = p.door_swing;
         $('bifold').checked = p.bifold;
         $('include_rod').checked = p.include_rod;
         $('top_shelf').checked = p.top_shelf;
         $('shelf_count').value = p.shelf_count;
+        if (p.closet_interior) $('closet_interior').value = p.closet_interior;
+        if (p.shelf_layout) $('shelf_layout').value = p.shelf_layout;
+        if (p.type === 'closet' && p.shelf_count > 0) $('closet_shelf_count').value = p.shelf_count;
         $('divider_count').value = p.divider_count;
+        if (p.cubby_doors !== undefined) $('cubby_doors').checked = p.cubby_doors;
+        if (p.type === 'cubby') {
+          if (p.door_count) $('cubby_door_count').value = String(p.door_count);
+          if (p.door_swing) $('cubby_door_swing').value = p.door_swing;
+          if (p.door_gap !== undefined) $('cubby_door_gap').value = p.door_gap;
+        }
+        if (p.corner_side) $('corner_side').value = p.corner_side;
+        if (p.corner_overlay) $('corner_overlay').value = p.corner_overlay;
+        ['leg_a_rod', 'leg_b_rod', 'leg_a_shelf', 'leg_b_shelf', 'leg_a_doors', 'leg_b_doors']
+          .forEach(function (k) { if (p[k] !== undefined) $(k).checked = p[k]; });
+        if (p.type === 'corner_closet' && p.door_gap !== undefined) {
+          $('corner_door_gap').value = p.door_gap;
+        }
         ['carcass', 'face', 'box', 'back', 'shelf', 'bottom'].forEach(function (r) {
           if (p['mat_' + r]) setMat(r, p['mat_' + r]);
         });
+        openAdvancedIfChanged();
       }
       updateCustomRow();
+      updateGrooveRow();
       updateThicknessRows();
+      updateBaseRows();
+      updateRodRow();
+      updateDoorRows();
+      updateCornerRodRows();
+      updateCubbyDoorRows();
       setEditing(!!data.editing);
       if (data.rescaled) {
-        status('Unit was scaled in the model \u2014 dimensions updated to match. ' +
+        status('Unit was scaled in the model — dimensions updated to match. ' +
                'Update rebuilds it cleanly at this size.', false);
       }
     },
@@ -452,19 +848,51 @@
       setEditing(false);
       status('Next Build creates a new unit.', false);
     },
-    onError: function (msg) { status(msg, true); }
+    onError: function (msg) { status(msg, true); },
+    setAnim: setAnim,
+    onAnimStart: function () { state.animating = true; updateAnimButtons(); },
+    onAnimDone: function () { state.animating = false; updateAnimButtons(); }
   };
 
   // --- wiring ---
   document.querySelectorAll('.tab').forEach(function (t) {
     t.addEventListener('click', function () { setType(t.dataset.type); });
   });
+  // ".25" -> "0.25" (also inside comma lists like ".5, .25")
+  document.addEventListener('change', function (e) {
+    var el = e.target;
+    if (el.tagName !== 'INPUT' || el.type !== 'text') return;
+    var fixed = el.value.replace(/(^|[\s,])\.(\d)/g, '$10.$2');
+    if (fixed !== el.value) el.value = fixed;
+  });
   $('height_mode').addEventListener('change', updateCustomRow);
+  $('bottom_groove').addEventListener('change', updateGrooveRow);
   $('panel').addEventListener('change', updateThicknessRows);
   $('back_thickness').addEventListener('change', updateThicknessRows);
+  $('base_type').addEventListener('change', updateBaseRows);
+  $('riser_face').addEventListener('change', updateBaseRows);
+  $('include_rod').addEventListener('change', updateRodRow);
+  $('closet_interior').addEventListener('change', updateRodRow);
+  $('shelf_layout').addEventListener('change', updateRodRow);
+  $('door_count').addEventListener('change', updateDoorRows);
+  $('cubby_doors').addEventListener('change', updateCubbyDoorRows);
+  $('cubby_door_count').addEventListener('change', updateCubbyDoorRows);
+  $('leg_a_rod').addEventListener('change', updateCornerRodRows);
+  $('leg_b_rod').addEventListener('change', updateCornerRodRows);
+  $('leg_a_doors').addEventListener('change', updateCornerRodRows);
+  $('leg_b_doors').addEventListener('change', updateCornerRodRows);
   $('buildBtn').addEventListener('click', function () {
     var p = gather();
     if (p) su.build(JSON.stringify(p));
+  });
+  document.querySelectorAll('#advAnim input, #advAnim select').forEach(function (el) {
+    el.addEventListener('change', function () { su.anim_settings(animSettings()); });
+  });
+  $('animOpenBtn').addEventListener('click', function () { su.animate('open', animSettings()); });
+  $('animCloseBtn').addEventListener('click', function () { su.animate('close', animSettings()); });
+  $('animPlayBtn').addEventListener('click', function () {
+    if (state.animating) su.anim_stop();
+    else su.animate('play', animSettings());
   });
   $('detachLink').addEventListener('click', function () { su.detach(); });
   $('closeBtn').addEventListener('click', function () { su.close(); });

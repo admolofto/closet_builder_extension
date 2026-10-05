@@ -14,7 +14,7 @@ module AJL
           style:           UI::HtmlDialog::STYLE_DIALOG,
           resizable:       true,
           width:           430,
-          height:          720
+          height:          640
         )
         dlg.set_file(File.join(PLUGIN_DIR, 'ui', 'dialog.html'))
 
@@ -27,8 +27,11 @@ module AJL
             # If the unit was resized with the Scale tool, fold the scale
             # factors into the stored dimensions so the dialog shows the
             # actual size in the model.
+            # Skip for corner units: with two leg lengths and a rotated leg,
+            # axis scales don't map onto single width/depth params.
             sx, sy, sz = Builders.scale_factors(current)
-            if [sx, sy, sz].any? { |f| (f - 1.0).abs > 0.001 }
+            if params['type'] != 'corner_closet' &&
+               [sx, sy, sz].any? { |f| (f - 1.0).abs > 0.001 }
               params['width']  = snap(params['width'].to_f  * sx)
               params['depth']  = snap(params['depth'].to_f  * sy)
               params['height'] = snap(params['height'].to_f * sz)
@@ -40,13 +43,15 @@ module AJL
             materials: Materials.options_for_dialog,
             params:    params,
             editing:   !current.nil?,
-            rescaled:  rescaled
+            rescaled:  rescaled,
+            anim:      Animation.settings
           }
           dlg.execute_script("CB.init(#{payload.to_json});")
         end
 
         dlg.add_action_callback('build') do |_ctx, json|
           begin
+            Animation.stop # the rebuild replaces any parts in motion
             params  = JSON.parse(json)
             current = Builders.build(params, current)
             dlg.execute_script('CB.onBuilt(true);')
@@ -61,6 +66,29 @@ module AJL
           current = nil
           dlg.execute_script('CB.onDetached();')
         end
+
+        # Animation settings are per user, not per unit; Open / Close /
+        # Play move the unit being edited.
+        dlg.add_action_callback('anim_settings') do |_ctx, json|
+          s = Animation.save_settings(JSON.parse(json))
+          dlg.execute_script("CB.setAnim(#{s.to_json});")
+        end
+
+        dlg.add_action_callback('animate') do |_ctx, action, json|
+          s = Animation.save_settings(JSON.parse(json))
+          dlg.execute_script("CB.setAnim(#{s.to_json});")
+          msg =
+            if current && current.valid?
+              Animation.run([current], action, s) do
+                dlg.execute_script('CB.onAnimDone();') if dlg.visible?
+              end
+            else
+              'Build the unit first.'
+            end
+          dlg.execute_script(msg ? "CB.onError(#{msg.to_json});" : 'CB.onAnimStart();')
+        end
+
+        dlg.add_action_callback('anim_stop') { |_ctx| Animation.stop }
 
         dlg.add_action_callback('close') { |_ctx| dlg.close }
 

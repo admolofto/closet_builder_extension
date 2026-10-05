@@ -5,21 +5,16 @@ module AJL
   module ClosetBuilder
     module Materials
       PRESETS = {
-        'white_melamine' => { name: 'White Melamine',  color: [246, 246, 242] },
-        'grey_melamine'  => { name: 'Grey Melamine',   color: [168, 170, 173] },
-        'black_melamine' => { name: 'Black Melamine',  color: [42, 42, 45] },
-        'maple'          => { name: 'Maple',           color: [226, 200, 156] },
-        'white_oak'      => { name: 'White Oak',       color: [203, 178, 138] },
-        'walnut'         => { name: 'Walnut',          color: [96, 67, 47] },
-        'birch_ply'      => { name: 'Birch Plywood',   color: [235, 214, 172] },
-        'navy'           => { name: 'Navy Lacquer',    color: [44, 58, 86] },
-        'sage'           => { name: 'Sage Lacquer',    color: [157, 169, 148] },
-        'chrome'         => { name: 'Chrome',          color: [201, 204, 208] }
+        'finished_34' => { name: '3/4 finished', color: [235, 214, 172] },
+        'rift_34'     => { name: '3/4 rift',     color: [203, 178, 138] },
+        'rift_12'     => { name: '1/2 rift',     color: [214, 191, 154] },
+        'face_34'     => { name: '3/4 face',     color: [255, 255, 255] },
+        'chrome'      => { name: 'Chrome',       color: [201, 204, 208] }
       }.freeze
 
       # Find or create the SketchUp material for a preset key.
       def self.fetch(model, key)
-        preset = PRESETS[key] || PRESETS['white_melamine']
+        preset = PRESETS[key] || PRESETS['finished_34']
         mat_name = "CB #{preset[:name]}"
         mat = model.materials[mat_name]
         unless mat
