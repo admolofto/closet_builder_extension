@@ -22,8 +22,14 @@ cutlist extensions.
 - **Re-edit later:** right-click a unit → **Edit Closet Unit...** Parameters are
   stored on the component. Scale-tool resizes are detected and folded back into
   the dimensions on edit; Update rebuilds cleanly at true size.
-- **Animate:** the dialog's **Animation** section (Open / Close / Play), or
-  right-click one or more units → **Animate Doors and Drawers**. Esc stops.
+- **Animate:** the dialog's **Animation** section (Open / Half / Close / Play),
+  or right-click one or more units → **Animate Doors and Drawers**. Esc stops.
+- **One door or drawer at a time:** **Open / close one at a time…** in the
+  dialog, **Animate Doors and Drawers → One at a Time...**, or **Extensions →
+  Closet Builder → Open/Close Doors and Drawers...**, then click doors and
+  drawers in the model: click opens or closes one, Shift+click half opens it,
+  right-click for more; Esc when done. Inside an open unit, right-click
+  selected doors or drawers → **Animate Doors and Drawers**.
 
 ## Features
 
@@ -92,9 +98,16 @@ cutlist extensions.
 - Settings (per user, shared by all units): door angle (bifolds stop at
   90°), drawer travel as % of box depth, duration, stagger between parts,
   easing (smooth / soft-close / linear), loop
-- **Play** opens, pauses and closes (looping until stopped); **Open** and
-  **Close** leave the fronts in that pose as one undoable step
-- Works on several selected units at once, including units inside groups
+- **Play** opens, pauses and closes (looping until stopped); **Open**,
+  **Half** (half the door angle / drawer travel) and **Close** leave the
+  fronts in that pose as one undoable step
+- Single doors and drawers open, half open or close one at a time; one
+  clicked while others move joins them, and one clicked mid-way turns back
+  from where it is. A corner closet's doors stay clear of each other:
+  opening the rear door opens the front one first, closing the front door
+  closes the rear one first
+- Works on several selected units at once, including units inside groups,
+  and inside an open unit
 - Units built before animation support need one Update to animate
 
 ## Development
@@ -104,7 +117,8 @@ closet_builder.rb            extension loader
 closet_builder/
   main.rb                    menus, context menu, attribute helpers
   builders.rb                all parametric geometry + param normalization
-  animation.rb               door / drawer animation (tagged by the builders)
+  animation.rb               door / drawer animation (tagged by the builders),
+                             one-at-a-time pick tool
   materials.rb               material presets per part role
   dialog.rb                  HtmlDialog <-> Ruby bridge (scale detection)
   ui/dialog.html             the dialog UI (vanilla JS)

@@ -67,8 +67,8 @@ module AJL
           dlg.execute_script('CB.onDetached();')
         end
 
-        # Animation settings are per user, not per unit; Open / Close /
-        # Play move the unit being edited.
+        # Animation settings are per user, not per unit; Open / Half /
+        # Close / Play move the unit being edited.
         dlg.add_action_callback('anim_settings') do |_ctx, json|
           s = Animation.save_settings(JSON.parse(json))
           dlg.execute_script("CB.setAnim(#{s.to_json});")
@@ -77,15 +77,23 @@ module AJL
         dlg.add_action_callback('animate') do |_ctx, action, json|
           s = Animation.save_settings(JSON.parse(json))
           dlg.execute_script("CB.setAnim(#{s.to_json});")
-          msg =
-            if current && current.valid?
-              Animation.run([current], action, s) do
-                dlg.execute_script('CB.onAnimDone();') if dlg.visible?
-              end
-            else
-              'Build the unit first.'
+          if current && current.valid?
+            # Counted before running: the run may end (and report) at once.
+            dlg.execute_script('CB.onAnimStart();')
+            msg = Animation.run([current], action, s) do
+              dlg.execute_script('CB.onAnimDone();') if dlg.visible?
             end
-          dlg.execute_script(msg ? "CB.onError(#{msg.to_json});" : 'CB.onAnimStart();')
+            dlg.execute_script("CB.onAnimDone(); CB.onError(#{msg.to_json});") if msg
+          else
+            dlg.execute_script("CB.onError(#{'Build the unit first.'.to_json});")
+          end
+        end
+
+        # Open / close individually: the pick tool works on any unit.
+        dlg.add_action_callback('anim_pick') do |_ctx, json|
+          s = Animation.save_settings(JSON.parse(json))
+          dlg.execute_script("CB.setAnim(#{s.to_json});")
+          Animation.pick_fronts
         end
 
         dlg.add_action_callback('anim_stop') { |_ctx| Animation.stop }
